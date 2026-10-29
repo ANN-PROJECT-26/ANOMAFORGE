@@ -1,0 +1,23 @@
+# Datasets, downloaded model weights, and generated checkpoints
+/data/
+/datasets/
+/checkpoints/
+/weights/
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.zip
+
+# Credentials and environment files
+.env
+.env.*
+!*.env.example
+*token*
+
+# Runtime/temporary files
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+/content/
+.DS_Store
