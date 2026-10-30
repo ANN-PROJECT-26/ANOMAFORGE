@@ -1,13 +1,11 @@
-# AnomaForge — Stage 1: Dataset Exploration
+AnomaForge — Stage 1: Dataset Exploration
 
 
-## Files
 
 - `P1/`, `P2/`, `P3/`, `P4/`: empty individual workspaces (with `.gitkeep` so GitHub preserves them). 
 - `final/01_data_exploration.ipynb`: our only notebook for Stage 1.
 - `.gitignore`: protects the public repository from large datasets, model weights, and accidental credentials.
 
-## Run Stage 1 in Colab
 
 1. Obtain the MVTec AD dataset from the original source: https://www.mvtec.com/research-teaching/datasets/mvtec-ad (follow the provider's access and license instructions).
 2. Unpack the `bottle` category into Google Drive, for example:
