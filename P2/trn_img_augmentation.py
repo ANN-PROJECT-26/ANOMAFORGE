@@ -39,31 +39,38 @@ def augment_normal_image(image, rng):
         result = ImageEnhance.Brightness(result).enhance(factor)
 
     return result
-# Preview a training image and examples of each transformation.
-# The preview RNG is independent of the training augmentation RNG.
-with Image.open(train_paths[0]) as image:
-    preview_original = image.convert('RGB')
-preview_rng = random.Random(123)
 
-preview_examples = [
-    ('Original', preview_original),
-    ('Horizontal flip', ImageOps.mirror(preview_original)),
-    ('Rotation +10 degrees', preview_original.rotate(
-        10, resample=Image.Resampling.BILINEAR, expand=False,
-        fillcolor=(255, 255, 255))),
-    ('Brightness x1.05', ImageEnhance.Brightness(preview_original).enhance(1.05)),
-    ('Random example 1', augment_normal_image(preview_original, preview_rng)),
-    ('Random example 2', augment_normal_image(preview_original, preview_rng)),
-    ('Random example 3', augment_normal_image(preview_original, preview_rng)),
-    ('Random example 4', augment_normal_image(preview_original, preview_rng)),
-]
+def preview_augmentation(image_path):
+    """Display examples for one training image without advancing the training RNG."""
+    from pathlib import Path
+    import matplotlib.pyplot as plt
 
-fig, axes = plt.subplots(2, 4, figsize=(14, 7))
-for axis, (title, image) in zip(axes.flat, preview_examples):
-    axis.imshow(image)
-    axis.set_title(title)
-    axis.axis('off')
-plt.tight_layout()
-plt.show()
-print('Training example:', train_paths[0].name)
-print('Augmentation settings:', AUGMENT_CONFIG)
+    # Preview a training image and examples of each transformation.
+    # The preview RNG is independent of the training augmentation RNG.
+    with Image.open(image_path) as image:
+        preview_original = image.convert('RGB')
+    preview_rng = random.Random(123)
+
+    preview_examples = [
+        ('Original', preview_original),
+        ('Horizontal flip', ImageOps.mirror(preview_original)),
+        ('Rotation +10 degrees', preview_original.rotate(
+            10, resample=Image.Resampling.BILINEAR, expand=False,
+            fillcolor=(255, 255, 255))),
+        ('Brightness x1.05', ImageEnhance.Brightness(preview_original).enhance(1.05)),
+        ('Random example 1', augment_normal_image(preview_original, preview_rng)),
+        ('Random example 2', augment_normal_image(preview_original, preview_rng)),
+        ('Random example 3', augment_normal_image(preview_original, preview_rng)),
+        ('Random example 4', augment_normal_image(preview_original, preview_rng)),
+    ]
+
+    fig, axes = plt.subplots(2, 4, figsize=(14, 7))
+    for axis, (title, image) in zip(axes.flat, preview_examples):
+        axis.imshow(image)
+        axis.set_title(title)
+        axis.axis('off')
+    plt.tight_layout()
+    plt.show()
+    print('Training example:', Path(image_path).name)
+    print('Augmentation settings:', AUGMENT_CONFIG)
+
