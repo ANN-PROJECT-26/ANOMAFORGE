@@ -1,8 +1,10 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import precision_recall_curve
+
 
 
 def compute_image_score(anomaly_map):
@@ -324,3 +326,55 @@ def evaluate_model(
         "image_scores": image_scores,
         "decisions": decisions
     }
+
+
+def visualize_comparison(
+    ground_truth,
+    baseline_map,
+    full_map,
+    baseline_threshold,
+    full_threshold
+):
+    """
+    Visualize ground truth, baseline predictions,
+    and full model predictions for one image.
+    """
+
+    gt = np.asarray(ground_truth) > 0
+    baseline_map = np.asarray(baseline_map)
+    full_map = np.asarray(full_map)
+
+    baseline_mask = baseline_map >= baseline_threshold
+    full_mask = full_map >= full_threshold
+
+    fig, axes = plt.subplots(1, 5, figsize=(18, 4))
+
+    axes[0].imshow(gt, cmap="gray", vmin=0, vmax=1)
+    axes[0].set_title("Ground Truth")
+
+    axes[1].imshow(
+        baseline_map, cmap="jet", vmin=0, vmax=2
+    )
+    axes[1].set_title("Baseline Heatmap")
+
+    axes[2].imshow(
+        baseline_mask, cmap="gray", vmin=0, vmax=1
+    )
+    axes[2].set_title("Baseline Mask")
+
+    axes[3].imshow(
+        full_map, cmap="jet", vmin=0, vmax=1
+    )
+    axes[3].set_title("NN3 Heatmap")
+
+    axes[4].imshow(
+        full_mask, cmap="gray", vmin=0, vmax=1
+    )
+    axes[4].set_title("NN3 Mask")
+
+    for ax in axes:
+        ax.axis("off")
+
+    plt.tight_layout()
+    plt.show()
+
