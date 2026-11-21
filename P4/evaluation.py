@@ -230,3 +230,97 @@ def inspection_decision(image_score, image_threshold):
 
     return "PASS"
 
+
+def calibrate_thresholds(
+    normal_dev_maps, synthetic_dev_masks, synthetic_dev_maps
+):
+    """
+    Calibrate thresholds using development data only.
+    All maps and masks have shape [N, H, W].
+    """
+
+    # Compute normal development image scores
+    normal_dev_scores = [
+        compute_image_score(m) for m in normal_dev_maps
+    ]
+
+    image_threshold = compute_image_threshold(
+        normal_dev_scores
+    )
+
+    segmentation_threshold = select_segmentation_threshold(
+        synthetic_dev_masks,
+        synthetic_dev_maps
+    )
+
+    return {
+        "image_threshold": image_threshold,
+        "segmentation_threshold": segmentation_threshold
+    }
+
+
+def evaluate_model(
+    image_labels, ground_truth_masks, anomaly_maps, thresholds
+):
+    """
+    Evaluate a model using previously selected thresholds.
+
+    Input:
+        image_labels: [N]
+        ground_truth_masks: [N, H, W]
+        anomaly_maps: [N, H, W]
+        thresholds: Calibrated threshold dictionary
+
+    Output:
+        Evaluation metrics and inspection decisions
+    """
+
+    anomaly_maps = np.asarray(anomaly_maps)
+    ground_truth_masks = np.asarray(ground_truth_masks)
+    image_labels = np.asarray(image_labels).reshape(-1)
+
+    if anomaly_maps.ndim != 3:
+        raise ValueError("Expected anomaly maps [N, H, W]")
+
+    if anomaly_maps.shape != ground_truth_masks.shape:
+        raise ValueError("Masks and maps must match")
+
+    if len(image_labels) != len(anomaly_maps):
+        raise ValueError("Number of labels and maps must match")
+
+    # Image-level anomaly scores
+    image_scores = np.array([
+        compute_image_score(m) for m in anomaly_maps
+    ])
+
+    # Primary evaluation metrics
+    image_auc = compute_image_auroc(
+        image_labels, image_scores
+    )
+
+    pixel_auc = compute_pixel_auroc(
+        ground_truth_masks, anomaly_maps
+    )
+
+    # Additional segmentation metrics
+    segmentation_results = compute_segmentation_metrics(
+        ground_truth_masks,
+        anomaly_maps,
+        thresholds["segmentation_threshold"]
+    )
+
+    # Inspection recommendations
+    decisions = [
+        inspection_decision(
+            score, thresholds["image_threshold"]
+        )
+        for score in image_scores
+    ]
+
+    return {
+        "image_auroc": image_auc,
+        "pixel_auroc": pixel_auc,
+        **segmentation_results,
+        "image_scores": image_scores,
+        "decisions": decisions
+    }
