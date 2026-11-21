@@ -5,7 +5,7 @@ https://www.mvtec.com/research-teaching/datasets/mvtec-ad/downloads
 download files form the above link and place it in your gdrive so that you can 
 mount it while running , i have just done for one dataset
 
-Link to our colab notebook - https://colab.research.google.com/drive/10dEBIAIRFmJVq4sv-9W7QlmC01-HeVNc?usp=sharing
+Link to our colab notebook - [https://colab.research.google.com/drive/10dEBIAIRFmJVq4sv-9W7QlmC01-HeVNc?usp=sharing](https://colab.research.google.com/drive/1Uet9fp7BPaTgtYvaaVsxDIbUjVAAisQk?usp=sharing)
 
 update it to final folder evry time you update it
 
