@@ -118,4 +118,52 @@ def compute_pixel_auroc(ground_truth_masks, anomaly_maps):
 
     return float(roc_auc_score(labels, scores))
 
+def compute_segmentation_metrics(
+    ground_truth_masks, anomaly_maps, threshold
+):
+    """
+    Compute pixel-level Dice, IoU, Precision and Recall.
 
+    Input:
+        ground_truth_masks: Binary masks [N, H, W]
+        anomaly_maps: Continuous scores [N, H, W]
+        threshold: Segmentation threshold
+
+    Output:
+        Dictionary of segmentation metrics
+    """
+
+    masks = np.asarray(ground_truth_masks)
+    scores = np.asarray(anomaly_maps)
+
+    if masks.shape != scores.shape:
+        raise ValueError("Masks and anomaly maps must match")
+
+    # Convert to binary masks
+    gt = masks > 0
+    pred = scores >= threshold
+
+    # Compute confusion counts across all pixels
+    tp = int(np.sum(gt & pred))
+    fp = int(np.sum(~gt & pred))
+    fn = int(np.sum(gt & ~pred))
+    tn = int(np.sum(~gt & ~pred))
+
+    def safe_divide(numerator, denominator):
+        return numerator / denominator if denominator > 0 else 0.0
+
+    dice = safe_divide(2 * tp, 2 * tp + fp + fn)
+    iou = safe_divide(tp, tp + fp + fn)
+    precision = safe_divide(tp, tp + fp)
+    recall = safe_divide(tp, tp + fn)
+
+    return {
+        "dice": dice,
+        "iou": iou,
+        "precision": precision,
+        "recall": recall,
+        "tp": tp,
+        "fp": fp,
+        "fn": fn,
+        "tn": tn
+    }
