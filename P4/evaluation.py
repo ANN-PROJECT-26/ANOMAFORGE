@@ -2,6 +2,8 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from sklearn.metrics import roc_auc_score
+from sklearn.metrics import precision_recall_curve
+
 
 def compute_image_score(anomaly_map):
     """
@@ -167,3 +169,64 @@ def compute_segmentation_metrics(
         "fn": fn,
         "tn": tn
     }
+
+
+def compute_image_threshold(normal_dev_scores):
+    """
+    Set the image threshold using the 95th percentile
+    of normal development image scores.
+    """
+    scores = np.asarray(normal_dev_scores, dtype=np.float64)
+
+    if scores.size == 0 or not np.isfinite(scores).all():
+        raise ValueError("Invalid development scores")
+
+    return float(np.percentile(scores, 95))
+
+
+def select_segmentation_threshold(dev_masks, dev_maps):
+    """
+    Select the threshold that maximizes pixel-level Dice
+    using synthetic development data only.
+    """
+    masks = np.asarray(dev_masks)
+    scores = np.asarray(dev_maps)
+
+    if masks.shape != scores.shape:
+        raise ValueError("Masks and anomaly maps must match")
+
+    labels = (masks > 0).astype(np.uint8).flatten()
+    scores = scores.flatten()
+
+    if np.unique(labels).size != 2:
+        raise ValueError("Both pixel classes are required")
+
+    precision, recall, thresholds = precision_recall_curve(
+        labels, scores
+    )
+
+    # Calculate Dice for each threshold
+    p = precision[:-1]
+    r = recall[:-1]
+
+    dice = np.divide(
+        2 * p * r,
+        p + r,
+        out=np.zeros_like(p),
+        where=(p + r) > 0
+    )
+
+    best_index = np.argmax(dice)
+
+    return float(thresholds[best_index])
+
+
+def inspection_decision(image_score, image_threshold):
+    """
+    Generate a PASS or REVIEW recommendation.
+    """
+    if image_score > image_threshold:
+        return "REVIEW"
+
+    return "PASS"
+
