@@ -25,6 +25,8 @@
 ## Status
 
 The baseline notebook contains a completed training run and a single-image anomaly-scoring example. Augmentation is implemented and has been used for a single training update; integration into the full batch-training loop and evaluation of the augmented model are in progress.
+11/22 :  AnomaForge_Integrated_With_Augmentation_trained.ipynb integrated and trained on augmented images ( augmentation not controlled category-wise )
+11/23 :  trn_img_augmentation_category.py category- wise augmentation wrote, need to train on these aug images
 
 The notebooks require the MVTec AD bottle dataset and `P1/teacher.py`. The augmented notebook expects `P2/trn\_img\_augmentation.py`; align that path with the supplied augmentation filename before running it.
 
